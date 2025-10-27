@@ -8,6 +8,7 @@ test.describe('ELLE Website Script & Analytics Verification', () => {
   let domScripts;
   let allScripts;
   let gaRequest;
+  let capturedURLs = '';
 
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext();
@@ -17,6 +18,9 @@ test.describe('ELLE Website Script & Analytics Verification', () => {
       const url = req.url();
       if (/google|analytics|gtm|moapt/i.test(url)) {
         collectedRequests.push(url);
+      }
+      if (url.includes('collect')) {
+        capturedURLs += url;
       }
     });
 
@@ -31,10 +35,9 @@ test.describe('ELLE Website Script & Analytics Verification', () => {
         (url.includes(GA_MEASUREMENT_ID) || postData.includes(GA_MEASUREMENT_ID))
       );
     }, { timeout: 60000 });
-
+    
     domScripts = await page.$$eval('script[src]', els => els.map(e => e.src));
     allScripts = [...new Set([...collectedRequests, ...domScripts])];
-
   });
 
   test('Verify analytics and script loading on ELLE website', async () => {
@@ -46,5 +49,9 @@ test.describe('ELLE Website Script & Analytics Verification', () => {
     
   test('Verify Google Analytics request with correct Measurement ID', async () => {
     expect(gaRequest.url()).toContain(GA_MEASUREMENT_ID);
+  });
+
+  test('Verify pageViewEvent was fired', async () => {
+    expect(capturedURLs).toContain('en=PageView');
   });
 });
