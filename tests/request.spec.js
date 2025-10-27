@@ -43,7 +43,6 @@ test.describe('ELLE Website Script & Analytics Verification', () => {
       expect(exists, `${script} should be loaded or present in DOM`).toBeTruthy();
     }
   });
-
     
   test('Verify Google Analytics request with correct Measurement ID', async () => {
     expect(gaRequest.url()).toContain(GA_MEASUREMENT_ID);
